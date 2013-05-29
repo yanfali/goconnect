@@ -49,7 +49,7 @@ func (basic *BasicAuth) ServeHTTP(res http.ResponseWriter, req *http.Request, ne
 	if strings.HasPrefix(authtoken, BASIC) {
 		data := []byte(basic.User + ":" + basic.Password)
 		str := base64.StdEncoding.EncodeToString(data)
-		if str != authtoken[len(BASIC):] {
+		if str != authtoken[BASIC_LEN:] {
 			return
 		}
 	} else {
