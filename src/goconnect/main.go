@@ -29,6 +29,10 @@ func main() {
 	}
 
 	logger, _ := middleware.NewLogger()
+	connect.Use(logger)
+
+	userSess, _ := middleware.NewUserSession("yanapp", false)
+	connect.Use(userSess)
 
 	auth, _ := middleware.NewBasicAuth("yan", "yan")
 	connect.Use(auth)
@@ -39,8 +43,6 @@ func main() {
 	static, _ := middleware.NewStatic("/public", "/tmp")
 	connect.Use(static)
 	connect.Use(&MyApp{})
-
-	connect.Use(logger)
 
 	http.Handle("/", connect)
 	http.ListenAndServe(":8000", nil)
