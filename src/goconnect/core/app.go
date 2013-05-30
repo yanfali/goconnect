@@ -9,6 +9,10 @@ var ()
 
 const ()
 
+type Page struct {
+	Title, Description string
+}
+
 type Application struct {
 	Router *mux.Router
 }
