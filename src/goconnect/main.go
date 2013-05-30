@@ -1,25 +1,21 @@
 package main
 
 import (
-	"fmt"
 	"goconnect/core"
 	"goconnect/middleware"
 	"log"
 	"net/http"
+	"fmt"
 )
 
 func init() {}
 
-type MyApp struct{}
-
-func (app *MyApp) ServeHTTP(res http.ResponseWriter, req *http.Request, next core.NextMiddleware) {
-	log.Printf("%s: Serving App", app.Name())
-	fmt.Fprintf(res, "Hello Mom")
-	next()
+func HomeHandler(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(res, "Welcome Home");
 }
 
-func (app *MyApp) Name() string {
-	return "app"
+func LoginHandler(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(res, "Login Page Here");
 }
 
 func main() {
@@ -34,7 +30,8 @@ func main() {
 	userSess, _ := middleware.NewUserSession("yanapp", false)
 	connect.Use(userSess)
 
-	auth, _ := middleware.NewBasicAuth("yan", "yan")
+	publicUrls := []string{}
+	auth, _ := middleware.NewRequireAuth(publicUrls, "/login")
 	connect.Use(auth)
 
 	limit, _ := middleware.NewLimit(1)
@@ -42,7 +39,10 @@ func main() {
 
 	static, _ := middleware.NewStatic("/public", "/tmp")
 	connect.Use(static)
-	connect.Use(&MyApp{})
+	app := core.NewApplication()
+	app.Router.HandleFunc("/", HomeHandler)
+	app.Router.HandleFunc("/login", LoginHandler)
+	connect.Use(app)
 
 	http.Handle("/", connect)
 	http.ListenAndServe(":8000", nil)

@@ -5,6 +5,10 @@ import (
 	"net/http"
 )
 
+var (
+	NOOP = func() {}
+)
+
 type Connect struct {
 	middlewares []*Middleware
 }
@@ -37,15 +41,13 @@ func (connect *Connect) Length() int {
 func (connect *Connect) MakeNext(res http.ResponseWriter, req *http.Request, index int) func() {
 	length := len(connect.middlewares)
 	if index >= length {
-		return func() {
-			log.Printf("End of function chain at %d", index)
-		}
+		return NOOP
 	} else {
 		return func() {
-			handler := connect.middlewares[index]
-			log.Printf("adding handler %s", handler.Handler.Name())
+			middleware := connect.middlewares[index]
+			log.Printf("adding handler %s", middleware.Handler.Name())
 			next := connect.MakeNext(res, req, index+1)
-			handler.Handler.ServeHTTP(res, req, next)
+			middleware.Handler.ServeHTTP(res, req, next)
 		}
 	}
 }
