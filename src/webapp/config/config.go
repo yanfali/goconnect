@@ -28,14 +28,15 @@ func SetBaseDir(path string) error {
 }
 
 func GetBaseDir() string {
-	mutex.Lock()
-	defer mutex.Unlock()
-	return Values[BASEDIR].(string)
+	return getValue(BASEDIR).(string)
 }
 
 func GetAppDir() string {
-	mutex.Lock()
-	defer mutex.Unlock()
-	return Values[APPDIR].(string)
+	return getValue(APPDIR).(string)
 }
 
+func getValue(key int) interface{} {
+	mutex.Lock()
+	defer mutex.Unlock()
+	return Values[key]
+}
