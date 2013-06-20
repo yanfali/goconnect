@@ -39,7 +39,7 @@ func main() {
 	}
 
 	logger, _ := middleware.NewLogger()
-	connect.Use(logger)
+		connect.Use(logger)
 
 	userSess, _ := middleware.NewUserSession("yanapp", false)
 	connect.Use(userSess)
@@ -51,11 +51,15 @@ func main() {
 	limit, _ := middleware.NewLimit(1)
 	connect.Use(limit)
 
-	static, _ := middleware.NewStatic("/public", "/tmp")
-	connect.Use(static)
+	staticScripts, _ := middleware.NewStatic("/scripts", config.GetAppDir() + "/scripts")
+	connect.Use(staticScripts)
+	staticImages, _ := middleware.NewStatic("/images", config.GetAppDir() + "/images")
+	connect.Use(staticImages)
+	staticStyles, _ := middleware.NewStatic("/styles", config.GetAppDir() + "/styles")
+	connect.Use(staticStyles)
 	app := core.NewApplication()
 	app.Router.HandleFunc("/", HomeHandler)
- 	loginHandler, err := handlers.NewLoginHandler("login")
+ 	loginHandler, err := handlers.NewLoginHandler("LoginHandler")
 	if err != nil {
 		panic(err)
 	}

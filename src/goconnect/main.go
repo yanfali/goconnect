@@ -1,21 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"goconnect/core"
 	"goconnect/middleware"
 	"log"
 	"net/http"
-	"fmt"
 )
 
 func init() {}
 
 func HomeHandler(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(res, "Welcome Home");
+	fmt.Fprintf(res, "Welcome Home")
 }
 
 func LoginHandler(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(res, "Login Page Here");
+	fmt.Fprintf(res, "Login Page Here")
 }
 
 func main() {
