@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"webapp/config"
+	"webapp/handlers"
 )
 
 var (
@@ -20,7 +21,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	log.Printf("basedir: %s, appdir: %s\n",config.GetBaseDir(), config.GetAppDir())
+	log.Printf("basedir: %s, appdir: %s\n", config.GetBaseDir(), config.GetAppDir())
 }
 
 func HomeHandler(res http.ResponseWriter, req *http.Request) {
@@ -54,7 +55,11 @@ func main() {
 	connect.Use(static)
 	app := core.NewApplication()
 	app.Router.HandleFunc("/", HomeHandler)
-	app.Router.HandleFunc("/login", LoginHandler)
+ 	loginHandler, err := handlers.NewLoginHandler("login")
+	if err != nil {
+		panic(err)
+	}
+	app.Router.Handle("/login", loginHandler)
 	connect.Use(app)
 
 	http.Handle("/", connect)
