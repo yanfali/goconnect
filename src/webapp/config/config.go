@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	mutex sync.Mutex
+	mutex  sync.Mutex
 	Values = make(map[int]interface{})
 )
 
@@ -39,4 +39,14 @@ func getValue(key int) interface{} {
 	mutex.Lock()
 	defer mutex.Unlock()
 	return Values[key]
+}
+
+//TODO Placeholder - load it from a file which never gets checked in
+func GetHashKey() []byte {
+	return []byte("0123456789ABCDEF0123456789ABCDEF")
+}
+
+//TODO Placeholder - load it from a file which never gets checked in
+func GetBlockKey() []byte {
+	return nil
 }

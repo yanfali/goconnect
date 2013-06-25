@@ -23,7 +23,6 @@ func (static *Static) Name() string {
 }
 
 func (static *Static) ServeHTTP(res http.ResponseWriter, req *http.Request, next core.NextMiddleware) {
-	log.Printf("%s", req.Method)
 	if req.Method != "GET" && req.Method != "HEAD" {
 		next()
 		return

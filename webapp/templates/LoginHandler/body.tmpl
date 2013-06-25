@@ -1,4 +1,5 @@
-<form id="login_form">
-	<input type="text" placeholder="{{.Username}}"></input>
-	<input type="password" placeholder="{{.Password}}"></input>
+<form id="login_form" url="/login" method="POST">
+	<input type="text" name="username" autofocus placeholder="{{.Username}}"></input>
+	<input type="password"  name="password" placeholder="{{.Password}}"></input>
+	<input type="submit" name="Login"></input>
 </form>

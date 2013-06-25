@@ -16,26 +16,26 @@ var ()
  */
 type RequireAuth struct {
 	/* Urls that don't require authentication */
-	PublicUrls  []string
-	LoginUrl    string
+	PublicUrls []string
+	LoginUrl   string
 	// Return true for invalid and false for a valid cookie
-	ValidatorFn func(*http.Cookie) bool
+	ValidatorFn func(*http.Cookie) (error)
 }
 
-func DefaultValidatorFn(*http.Cookie) bool {
-	return true
+func DefaultValidatorFn(*http.Cookie) (error) {
+	return nil
 }
 
 func NewRequireAuth(publicUrls []string, loginUrl string) (*RequireAuth, error) {
 	publicUrls = append(publicUrls, loginUrl)
-	return &RequireAuth{PublicUrls: publicUrls, LoginUrl: loginUrl}, nil
+	return &RequireAuth{PublicUrls: publicUrls, LoginUrl: loginUrl, ValidatorFn: DefaultValidatorFn}, nil
 }
 
 func (auth *RequireAuth) Name() string {
 	return "require-auth"
 }
 
-func (auth *RequireAuth) invalid(cookie *http.Cookie) bool {
+func (auth *RequireAuth) invalid(cookie *http.Cookie) (error) {
 	return auth.ValidatorFn(cookie)
 }
 
@@ -51,10 +51,20 @@ func (auth *RequireAuth) ServeHTTP(res http.ResponseWriter, req *http.Request, n
 			return
 		}
 	}
+
 	authCookie, err := req.Cookie("auth")
-	if err == http.ErrNoCookie || auth.invalid(authCookie) {
+	if err == http.ErrNoCookie {
 		http.Redirect(res, req, "/login", 302)
 		return
 	}
+
+ 	if err := auth.invalid(authCookie); err != nil {
+		log.Print(err);
+		http.Redirect(res, req, "/login", 302)
+		return
+	}
+
+
+	log.Printf("MADE IT THROUGH AUTH!")
 	next()
 }

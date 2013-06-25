@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	DEBUG = false
 	NOOP = func() {}
 )
 
@@ -29,7 +30,9 @@ func NewConnect() (*Connect, error) {
 }
 
 func (connect *Connect) Use(fn MiddlewareFunc) *Connect {
-	log.Printf("%s %d\n", fn.Name(), len(connect.middlewares))
+	if (DEBUG) {
+		log.Printf("%s %d\n", fn.Name(), len(connect.middlewares))
+	}
 	connect.middlewares = append(connect.middlewares, &Middleware{Handler: fn})
 	return connect
 }
@@ -45,7 +48,9 @@ func (connect *Connect) MakeNext(res http.ResponseWriter, req *http.Request, ind
 	} else {
 		return func() {
 			middleware := connect.middlewares[index]
-			log.Printf("adding handler %s", middleware.Handler.Name())
+			if (DEBUG) {
+				log.Printf("adding handler %s", middleware.Handler.Name())
+			}
 			next := connect.MakeNext(res, req, index+1)
 			middleware.Handler.ServeHTTP(res, req, next)
 		}

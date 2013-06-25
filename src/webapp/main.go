@@ -28,10 +28,6 @@ func HomeHandler(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(res, "Welcome Home")
 }
 
-func LoginHandler(res http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(res, "Login Page Here")
-}
-
 func main() {
 	connect, err := core.NewConnect()
 	if err != nil {
@@ -59,13 +55,16 @@ func main() {
 	connect.Use(staticStyles)
 	app := core.NewApplication()
 	app.Router.HandleFunc("/", HomeHandler)
- 	loginHandler, err := handlers.NewLoginHandler("LoginHandler")
+
+ 	loginHandler, err := handlers.NewLoginHandler(app.Router.PathPrefix("/login").Subrouter())
 	if err != nil {
 		panic(err)
 	}
-	app.Router.Handle("/login", loginHandler)
-	connect.Use(app)
+
+	auth.ValidatorFn = loginHandler.ValidAuthCookie
 
 	http.Handle("/", connect)
+
+	connect.Use(app)
 	http.ListenAndServe(":8000", nil)
 }
