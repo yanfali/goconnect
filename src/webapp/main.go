@@ -54,17 +54,22 @@ func main() {
 	staticStyles, _ := middleware.NewStatic("/styles", config.GetAppDir() + "/styles")
 	connect.Use(staticStyles)
 	app := core.NewApplication()
-	app.Router.HandleFunc("/", HomeHandler)
+	connect.Use(app)
 
+
+	/* Middleware that wants to custom SubRouting */
  	loginHandler, err := handlers.NewLoginHandler(app.Router.PathPrefix("/login").Subrouter())
 	if err != nil {
 		panic(err)
 	}
 
+	// Set a customer auth required validator
 	auth.ValidatorFn = loginHandler.ValidAuthCookie
 
 	http.Handle("/", connect)
 
-	connect.Use(app)
+	/* Application Goes Here */
+	app.Router.HandleFunc("/", HomeHandler)
+
 	http.ListenAndServe(":8000", nil)
 }
