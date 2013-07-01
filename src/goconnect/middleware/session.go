@@ -11,7 +11,7 @@ const ()
 
 type UserSession struct {
 	CookieName string
-	Secure bool
+	Secure     bool
 }
 
 func NewUserSession(cookieName string, secure bool) (*UserSession, error) {
@@ -30,7 +30,7 @@ func (user *UserSession) ServeHTTP(res http.ResponseWriter, req *http.Request, n
 			Value:    hex.EncodeToString(rawid),
 			Path:     "/",
 			HttpOnly: true,
-			Secure: user.Secure,
+			Secure:   user.Secure,
 		}
 		http.SetCookie(res, cookie)
 	}

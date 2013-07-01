@@ -21,7 +21,7 @@ func (limit *Limit) Name() string {
 
 type resState struct {
 	Fail bool
-	Msg string	
+	Msg  string
 	Code int
 }
 

@@ -19,10 +19,10 @@ type RequireAuth struct {
 	PublicUrls []string
 	LoginUrl   string
 	// Return true for invalid and false for a valid cookie
-	ValidatorFn func(*http.Cookie) (error)
+	ValidatorFn func(*http.Cookie) error
 }
 
-func DefaultValidatorFn(*http.Cookie) (error) {
+func DefaultValidatorFn(*http.Cookie) error {
 	return nil
 }
 
@@ -35,7 +35,7 @@ func (auth *RequireAuth) Name() string {
 	return "require-auth"
 }
 
-func (auth *RequireAuth) invalid(cookie *http.Cookie) (error) {
+func (auth *RequireAuth) invalid(cookie *http.Cookie) error {
 	return auth.ValidatorFn(cookie)
 }
 
@@ -58,12 +58,11 @@ func (auth *RequireAuth) ServeHTTP(res http.ResponseWriter, req *http.Request, n
 		return
 	}
 
- 	if err := auth.invalid(authCookie); err != nil {
-		log.Print(err);
+	if err := auth.invalid(authCookie); err != nil {
+		log.Print(err)
 		http.Redirect(res, req, "/login", 302)
 		return
 	}
-
 
 	log.Printf("MADE IT THROUGH AUTH!")
 	next()

@@ -7,8 +7,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"webapp/config"
 	"time"
+	"webapp/config"
 )
 
 type LoginHandler struct {
@@ -35,34 +35,41 @@ func NewLoginHandler(router *mux.Router) (*LoginHandler, error) {
 func (h *LoginHandler) GetHandler(res http.ResponseWriter, req *http.Request) {
 	log.Printf("Running login handler")
 
-	_, err := req.Cookie("auth")
-	if err == nil {
-		http.Redirect(res, req, "/", 302)
-		return
+	if authCookie, err := req.Cookie("auth"); err == nil {
+		if err = h.ValidAuthCookie(authCookie); err == nil {
+			http.Redirect(res, req, "/", 302)
+		} else {
+			log.Printf("Cookie was invalid. Resetting and redirecting to login.")
+			authCookie.MaxAge = -1
+			authCookie.Expires = time.Now().UTC()
+			authCookie.Value = "invalid"
+			http.SetCookie(res, authCookie)
+			http.Redirect(res, req, "/login", 302)
+			return
+		}
 	}
-
 
 	page := struct{ Title, Description, Username, Password, Prefix string }{
 		"Login", "Enter credentials to login", "Username", "Password", "login",
 	}
-	err = h.Templates.ExecuteTemplate(res, "html5.tmpl", page)
+	err := h.Templates.ExecuteTemplate(res, "html5.tmpl", page)
 	if err != nil {
 		log.Print(err)
 	}
 }
 
 type AuthCookie struct {
-	Username string
+	Username  string
 	Timestamp int64
 }
 
-func (h *LoginHandler) ValidAuthCookie(authCookie *http.Cookie) (error) {
+func (h *LoginHandler) ValidAuthCookie(authCookie *http.Cookie) error {
 	var err error
 	var value AuthCookie
 	if err = h.SecureCookie.Decode("auth", authCookie.Value, &value); err == nil {
 		log.Printf("The auth cookie was valid and contained: u=%s t=%d", value.Username, value.Timestamp)
 	}
-	return err;
+	return err
 }
 
 func (h *LoginHandler) PostHandler(res http.ResponseWriter, req *http.Request) {
@@ -78,12 +85,14 @@ func (h *LoginHandler) PostHandler(res http.ResponseWriter, req *http.Request) {
 		}
 		if encoded, err := h.SecureCookie.Encode("auth", val); err == nil {
 			cookie := &http.Cookie{
-				Name: "auth",
-				Value: encoded,
-				Path: "/",
+				Name:     "auth",
+				Value:    encoded,
+				HttpOnly: true,
+				Expires:  time.Now().UTC().Add(time.Hour * 24),
+				Path:     "/",
 			}
 			http.SetCookie(res, cookie)
-			log.Printf("Auth Successful. Redirecting to /");
+			log.Printf("Auth Successful. Redirecting to /")
 			http.Redirect(res, req, "/", 302)
 		}
 	}
